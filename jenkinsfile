@@ -22,6 +22,7 @@ pipeline {
                 sh 'echo "Current directory: $(pwd)"'
                 sh 'npm --version'
                 sh 'node --version'
+                sh 'cd my-app'
                 sh 'npm install'
             }
         }
