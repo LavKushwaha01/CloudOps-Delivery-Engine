@@ -7,6 +7,9 @@ pipeline {
         DEV_SERVER = 'ubuntu@dev-server'
         STAGING_SERVER = 'ubuntu@staging-server'
         PROD_SERVER = 'ubuntu@prod-server'
+        APP_NAME = "jenkins-deployment"
+        DOCKERHUB_USER = "lavkushwaha01"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -18,7 +21,6 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pwd'
                 sh 'echo "Current directory: $(pwd)"'
                 sh 'npm --version'
                 sh 'node --version'
@@ -29,11 +31,30 @@ pipeline {
             }
         }
 
-        stage('Build & create docker image') {
+        stage('Build Application') {
             steps {
-                sh 'pwd'
+                echo "🔹 Building the application..."
                 sh 'npm run build'
+            }
+        }
 
+         stage('Docker Build & Push') {
+            steps {
+                script {
+                    echo "🔹 Building Docker image..."
+                    sh """
+                        docker build -t ${APP_NAME}:${IMAGE_TAG} .
+                        docker tag ${APP_NAME}:${IMAGE_TAG} ${DOCKERHUB_USER}/${APP_NAME}:${IMAGE_TAG}
+                    """
+                    echo "🔹 Pushing Docker image to DockerHub..."
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_SECRET_KEY')]) {
+                        sh """
+                            echo $DOCKERHUB_SECRET_KEY | docker login -u $DOCKERHUB_USERNAME --password-stdin
+                            docker push ${DOCKERHUB_USER}/${APP_NAME}:${IMAGE_TAG}
+                            docker logout
+                        """
+                    }
+                }
             }
         }
 
