@@ -19,6 +19,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh 'pwd'
+                sh 'echo "Current directory: $(pwd)"'
+                sh 'npm --version'
+                sh 'node --version'
                 sh 'npm install'
             }
         }
