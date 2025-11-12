@@ -1,1 +1,67 @@
 
+pipeline {
+    agent any
+
+    environment {
+        // Example: store SSH keys or API tokens in Jenkins credentials
+        DEV_SERVER = 'ubuntu@dev-server'
+        STAGING_SERVER = 'ubuntu@staging-server'
+        PROD_SERVER = 'ubuntu@prod-server'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'pwd'
+                sh 'npm install'
+            }
+        }
+
+        stage('Build & create docker image') {
+            steps {
+                sh 'pwd'
+                sh 'npm run build'
+
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                anyOf {
+                    branch 'Development'
+                    branch 'Stagging'
+                    branch 'Production'
+                }
+            }
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'Development') {
+                        sh "echo Deploying to DEV server"
+                        sh "scp -r dist ${DEV_SERVER}:/var/www/dev"
+                    } else if (env.BRANCH_NAME == 'Stagging') {
+                        sh "echo Deploying to STAGING server"
+                        sh "scp -r dist ${STAGING_SERVER}:/var/www/staging"
+                    } else if (env.BRANCH_NAME == 'Production') {
+                        sh "echo Deploying to PRODUCTION server"
+                        sh "scp -r dist ${PROD_SERVER}:/var/www/html"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment successful for branch: ${env.BRANCH_NAME}"
+        }
+        failure {
+            echo "❌ Deployment failed for branch: ${env.BRANCH_NAME}"
+        }
+    }
+}
