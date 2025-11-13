@@ -3,10 +3,13 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Fix npm network issues
+
+# Improve npm networking robustness (correct option names)
 RUN npm config set registry https://registry.npmjs.org/ \
+ && npm config set fetch-retries 5 \
+ && npm config set fetch-retry-factor 10 \
+ && npm config set fetch-retry-mintimeout 10000 \
  && npm config set fetch-retry-maxtimeout 600000 \
- && npm config set fetch-retry-minTimeout 30000 \
  && npm config set fetch-timeout 600000 \
  && npm config set maxsockets 50
 
@@ -24,10 +27,12 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Fix npm network issues
+# Set npm config again for production stage
 RUN npm config set registry https://registry.npmjs.org/ \
+ && npm config set fetch-retries 5 \
+ && npm config set fetch-retry-factor 10 \
+ && npm config set fetch-retry-mintimeout 10000 \
  && npm config set fetch-retry-maxtimeout 600000 \
- && npm config set fetch-retry-minTimeout 30000 \
  && npm config set fetch-timeout 600000 \
  && npm config set maxsockets 50
 
