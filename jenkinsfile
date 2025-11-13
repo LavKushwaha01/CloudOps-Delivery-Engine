@@ -57,6 +57,7 @@ pipeline {
                             docker logout
                         """
                     }
+                    echo "🔹 Image is pushed on dockerhub..."
                 }
             }
         }
