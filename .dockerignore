@@ -1,1 +1,8 @@
-node_module
+my-app/node_modules
+my-app/.next
+my-app/.git
+my-app/logs
+my-app/npm-debug.log
+Dockerfile
+docker-compose.yml
+.git
