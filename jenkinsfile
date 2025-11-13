@@ -94,5 +94,9 @@ pipeline {
         failure {
             echo "❌ Deployment failed for branch: ${env.BRANCH_NAME}"
         }
+          always {
+        echo "🧹 Cleaning up Docker to free space..."
+        sh "docker system prune -af --volumes"
+    }
     }
 }
