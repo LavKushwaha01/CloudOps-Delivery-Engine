@@ -1,1 +1,98 @@
 
+pipeline {
+    agent any
+
+    environment {
+        // Example: store SSH keys or API tokens in Jenkins credentials
+        DEV_SERVER = 'ubuntu@dev-server'
+        STAGING_SERVER = 'ubuntu@staging-server'
+        PROD_SERVER = 'ubuntu@prod-server'
+        APP_NAME = "jenkins-deployment"
+        DOCKERHUB_USER = "lavkushwaha01"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+
+  /*      stage('Install Dependencies') {
+            steps {
+                sh 'echo "Current directory: $(pwd)"'
+                sh 'npm --version'
+                sh 'node --version'
+                sh '''
+                   cd my-app
+                   npm ci
+                  '''
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                echo "🔹 Building the application..."
+                  sh '''
+                   cd my-app
+                   npm run build
+                  '''
+            }
+        } */
+
+         stage('Docker Build & Push') {
+            steps {
+                script {
+                    echo "🔹 Building Docker image..."
+                    sh """
+                        docker build -t ${APP_NAME}:${IMAGE_TAG} .
+                        docker tag ${APP_NAME}:${IMAGE_TAG} ${DOCKERHUB_USER}/${APP_NAME}:${IMAGE_TAG}
+                    """
+                    echo "🔹 Pushing Docker image to DockerHub..."
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_SECRET_KEY')]) {
+                        sh """
+                            echo $DOCKERHUB_SECRET_KEY | docker login -u $DOCKERHUB_USERNAME --password-stdin
+                            docker push ${DOCKERHUB_USER}/${APP_NAME}:${IMAGE_TAG}
+                            docker logout
+                        """
+                    }
+                    echo "🔹 Image is pushed on dockerhub..."
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                anyOf {
+                    branch 'Development'
+                    branch 'Stagging'
+                    branch 'Production'
+                }
+            }
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'Development') {
+                        sh "echo Deploying to DEV server"
+                        sh "scp -r dist ${DEV_SERVER}:/var/www/dev"
+                    } else if (env.BRANCH_NAME == 'Stagging') {
+                        sh "echo Deploying to STAGING server"
+                        sh "scp -r dist ${STAGING_SERVER}:/var/www/staging"
+                    } else if (env.BRANCH_NAME == 'Production') {
+                        sh "echo Deploying to PRODUCTION server"
+                        sh "scp -r dist ${PROD_SERVER}:/var/www/html"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment successful for branch: ${env.BRANCH_NAME}"
+        }
+        failure {
+            echo "❌ Deployment failed for branch: ${env.BRANCH_NAME}"
+        }
+    }
+}
