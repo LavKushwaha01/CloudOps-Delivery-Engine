@@ -26,7 +26,7 @@ pipeline {
                 sh 'node --version'
                 sh '''
                    cd my-app
-                   npm install
+                   npm ci
                   '''
             }
         }
