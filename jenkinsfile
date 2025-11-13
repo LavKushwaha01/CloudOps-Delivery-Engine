@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     environment {
-        // Examples: store SSH keys or API tokens in Jenkins credentials
+        // Example: store SSH keys or API tokens in Jenkins credentials
         DEV_SERVER = 'ubuntu@dev-server'
         STAGING_SERVER = 'ubuntu@staging-server'
         PROD_SERVER = 'ubuntu@prod-server'
