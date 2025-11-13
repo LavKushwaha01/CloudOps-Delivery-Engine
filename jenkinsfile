@@ -19,7 +19,7 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+  /*      stage('Install Dependencies') {
             steps {
                 sh 'echo "Current directory: $(pwd)"'
                 sh 'npm --version'
@@ -39,7 +39,7 @@ pipeline {
                    npm run build
                   '''
             }
-        }
+        } */
 
          stage('Docker Build & Push') {
             steps {

@@ -3,6 +3,13 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# Fix npm network issues
+RUN npm config set registry https://registry.npmjs.org/ \
+ && npm config set fetch-retry-maxtimeout 600000 \
+ && npm config set fetch-retry-minTimeout 30000 \
+ && npm config set fetch-timeout 600000 \
+ && npm config set maxsockets 50
+
 # Install dependencies
 COPY ./my-app/package*.json ./
 RUN npm ci
@@ -16,6 +23,13 @@ RUN npm run build
 FROM node:22-alpine
 
 WORKDIR /app
+
+# Fix npm network issues
+RUN npm config set registry https://registry.npmjs.org/ \
+ && npm config set fetch-retry-maxtimeout 600000 \
+ && npm config set fetch-retry-minTimeout 30000 \
+ && npm config set fetch-timeout 600000 \
+ && npm config set maxsockets 50
 
 # Install only production deps
 COPY ./my-app/package*.json ./
