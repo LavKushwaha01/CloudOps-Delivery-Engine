@@ -1,4 +1,4 @@
-# Jenkins-deployment-demo for production
+# CloudOps Delivery Engine for production
 demo project deployment via CI/CD using jenkins pipeline
 
 git branch -m main prod
