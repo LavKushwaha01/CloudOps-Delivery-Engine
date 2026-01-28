@@ -1,10 +1,10 @@
-# 1️⃣ Build Stage
+# Build Stage
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
 
-# Improve npm networking robustness (correct option names)
+# Improve npm networking robustness 
 RUN npm config set registry https://registry.npmjs.org/ \
  && npm config set fetch-retries 5 \
  && npm config set fetch-retry-factor 10 \
@@ -22,7 +22,7 @@ COPY my-app/ .
 # Build Next.js
 RUN npm run build
 
-# 2️⃣ Run Stage (Production)
+# Run Stage (Production)
 FROM node:22-alpine
 
 WORKDIR /app
