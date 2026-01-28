@@ -33,7 +33,7 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                echo "🔹 Building the application..."
+                echo " Building the application..."
                   sh '''
                    cd my-app
                    npm run build
@@ -44,12 +44,12 @@ pipeline {
          stage('Docker Build & Push') {
             steps {
                 script {
-                    echo "🔹 Building Docker image..."
+                    echo " Building Docker image..."
                     sh """
                         docker build -t ${APP_NAME}:${IMAGE_TAG} .
                         docker tag ${APP_NAME}:${IMAGE_TAG} ${DOCKERHUB_USER}/${APP_NAME}:${IMAGE_TAG}
                     """
-                    echo "🔹 Pushing Docker image to DockerHub..."
+                    echo " Pushing Docker image to DockerHub..."
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_SECRET_KEY')]) {
                         sh """
                             echo $DOCKERHUB_SECRET_KEY | docker login -u $DOCKERHUB_USERNAME --password-stdin
@@ -57,7 +57,7 @@ pipeline {
                             docker logout
                         """
                     }
-                    echo "🔹 Image is pushed on dockerhub..."
+                    echo " Image is pushed on dockerhub..."
                 }
             }
         }
@@ -89,13 +89,13 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment successful for branch: ${env.BRANCH_NAME}"
+            echo " Deployment successful for branch: ${env.BRANCH_NAME}"
         }
         failure {
-            echo "❌ Deployment failed for branch: ${env.BRANCH_NAME}"
+            echo " Deployment failed for branch: ${env.BRANCH_NAME}"
         }
           always {
-        echo "🧹 Cleaning up Docker to free space..."
+        echo " Cleaning up Docker to free space..."
         sh "docker system prune -af --volumes"
     }
     }
